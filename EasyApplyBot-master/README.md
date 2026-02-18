@@ -45,6 +45,73 @@ npm install
 npm run dev
 ```
 
+## Next steps to run this LinkedIn bot
+
+### 1) Start backend
+
+From repo root:
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+pip install -r backend/requirements.txt
+python -m playwright install chromium
+cp .env.example .env
+uvicorn backend.app.main:app --reload --port 8000
+```
+
+### 2) Start frontend dashboard
+
+In a second terminal:
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+Open `http://localhost:3000`.
+
+### 3) Save credentials from dashboard
+
+In **Account & AI Settings**:
+
+- LinkedIn email
+- LinkedIn password
+- OpenAI API key (optional but recommended)
+- OpenAI model (default `gpt-4o-mini`)
+
+Click **Save settings**.
+
+### 4) Configure filters and start applying
+
+In **Filters**:
+
+- Enter comma-separated positions
+- Enter comma-separated locations
+- Toggle remote-only if needed
+- Click **Start applying**
+
+### 5) Monitor results
+
+- Top cards show totals/applied/failed/skipped
+- Recent Applications table shows job-level statuses and notes
+- Dashboard auto-refreshes every ~15 seconds
+
+### 6) Optional backend API checks
+
+```bash
+curl http://localhost:8000/health
+curl http://localhost:8000/api/settings
+curl http://localhost:8000/api/dashboard
+```
+
+### 7) Common issues
+
+- `POST /api/run` returns 400: LinkedIn credentials were not saved from dashboard settings.
+- Browser errors: run `python -m playwright install chromium` again.
+- Frontend dependency install fails (`npm` registry/proxy issue): fix network/proxy policy and rerun `npm install`.
+
 ## Deploying
 
 ### Front-end on Vercel
