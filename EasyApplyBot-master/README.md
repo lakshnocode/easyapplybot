@@ -14,6 +14,28 @@ This refactor modernizes the project into two apps:
 - Tracks `queued/processing/applied/skipped/failed` statuses in SQLite.
 - Front-end includes filters and live-refreshing stats.
 
+## Where to enter API key, LinkedIn email/password, and DB
+
+Put your credentials in a `.env` file at the **repo root** (`EasyApplyBot-master/.env`).
+
+1. Copy the template:
+
+```bash
+cp .env.example .env
+```
+
+2. Edit `.env` and set these values:
+
+- `LINKEDIN_EMAIL=...`
+- `LINKEDIN_PASSWORD=...`
+- `OPENAI_API_KEY=...`
+- `DATABASE_URL=...` (example: `sqlite:///./state.db`)
+- `NEXT_PUBLIC_API_URL=...` (for frontend -> backend URL)
+
+The backend now loads env vars from either:
+- `EasyApplyBot-master/.env` (recommended)
+- `EasyApplyBot-master/backend/.env` (optional alternate)
+
 ## Quick start
 
 ```bash
