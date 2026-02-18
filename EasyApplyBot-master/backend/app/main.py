@@ -2,7 +2,14 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
 from .config import settings
-from .schemas import DashboardStats, FilterPayload, JobStatus
+from .runtime_settings import runtime_settings_store
+from .schemas import (
+    DashboardStats,
+    FilterPayload,
+    JobStatus,
+    RuntimeSettingsResponse,
+    RuntimeSettingsUpdate,
+)
 from .state import dashboard_stats, init_db, list_jobs
 from .tasks import run_manager
 
@@ -27,6 +34,17 @@ def health() -> dict:
     return {'ok': True, 'running': run_manager.running}
 
 
+@app.get('/api/settings', response_model=RuntimeSettingsResponse)
+def get_settings():
+    return runtime_settings_store.get_safe()
+
+
+@app.post('/api/settings', response_model=RuntimeSettingsResponse)
+def update_settings(payload: RuntimeSettingsUpdate):
+    runtime_settings_store.update(payload.model_dump(exclude_unset=True))
+    return runtime_settings_store.get_safe()
+
+
 @app.get('/api/jobs', response_model=list[JobStatus])
 def jobs(limit: int = 100):
     return list_jobs(limit=limit)
@@ -39,6 +57,10 @@ def dashboard():
 
 @app.post('/api/run')
 def start_run(filters: FilterPayload):
+    current = runtime_settings_store.get()
+    if not current.linkedin_email or not current.linkedin_password:
+        raise HTTPException(status_code=400, detail='LinkedIn credentials are missing. Save them in dashboard settings first.')
+
     started = run_manager.start(filters.model_dump())
     if not started:
         raise HTTPException(status_code=409, detail='A run is already in progress.')

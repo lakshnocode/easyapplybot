@@ -4,15 +4,13 @@ import json
 
 import httpx
 
-from .config import settings
+from .runtime_settings import runtime_settings_store
 
 
 class AIAnswerer:
-    def __init__(self) -> None:
-        self.enabled = bool(settings.openai_api_key)
-
     async def answer(self, question: str, options: list[str] | None = None, profile: dict | None = None) -> str:
-        if not self.enabled:
+        runtime_settings = runtime_settings_store.get()
+        if not runtime_settings.openai_api_key:
             return self._fallback(question, options)
 
         prompt = {
@@ -29,11 +27,11 @@ class AIAnswerer:
             response = await client.post(
                 'https://api.openai.com/v1/chat/completions',
                 headers={
-                    'Authorization': f'Bearer {settings.openai_api_key}',
+                    'Authorization': f'Bearer {runtime_settings.openai_api_key}',
                     'Content-Type': 'application/json',
                 },
                 json={
-                    'model': settings.openai_model,
+                    'model': runtime_settings.openai_model,
                     'messages': [
                         {'role': 'system', 'content': 'You answer job application screening questions.'},
                         {'role': 'user', 'content': json.dumps(prompt)},

@@ -9,6 +9,7 @@ from playwright.async_api import async_playwright
 
 from .ai_answerer import AIAnswerer
 from .config import settings
+from .runtime_settings import runtime_settings_store
 
 
 @dataclass
@@ -43,8 +44,11 @@ class LinkedinBot:
 
     async def _login(self, page):
         await page.goto('https://www.linkedin.com/login', wait_until='domcontentloaded')
-        await page.fill('#username', settings.linkedin_email)
-        await page.fill('#password', settings.linkedin_password)
+        runtime_settings = runtime_settings_store.get()
+        if not runtime_settings.linkedin_email or not runtime_settings.linkedin_password:
+            raise RuntimeError('Missing LinkedIn credentials. Save them from the dashboard Settings panel.')
+        await page.fill('#username', runtime_settings.linkedin_email)
+        await page.fill('#password', runtime_settings.linkedin_password)
         await page.click('button[type="submit"]')
         await page.wait_for_load_state('networkidle')
 

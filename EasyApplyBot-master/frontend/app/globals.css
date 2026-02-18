@@ -10,3 +10,5 @@ button { width: fit-content; padding: 10px 14px; border: none; border-radius: 8p
 .inline input { width: auto; }
 table { width: 100%; border-collapse: collapse; background: #111827; border-radius: 10px; overflow: hidden; }
 th, td { padding: 10px; border-bottom: 1px solid #1f2937; text-align: left; }
+
+.ok { color: #34d399; margin: 0; }

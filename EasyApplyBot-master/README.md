@@ -16,25 +16,15 @@ This refactor modernizes the project into two apps:
 
 ## Where to enter API key, LinkedIn email/password, and DB
 
-Put your credentials in a `.env` file at the **repo root** (`EasyApplyBot-master/.env`).
+You now enter LinkedIn/OpenAI credentials directly in the **frontend dashboard**:
 
-1. Copy the template:
+- Open the app in the browser (`http://localhost:3000`)
+- Use the **Account & AI Settings** panel
+- Click **Save settings**
 
-```bash
-cp .env.example .env
-```
+The backend stores these runtime values in `runtime_settings.json` at repo root, and uses them for automation.
 
-2. Edit `.env` and set these values:
-
-- `LINKEDIN_EMAIL=...`
-- `LINKEDIN_PASSWORD=...`
-- `OPENAI_API_KEY=...`
-- `DATABASE_URL=...` (example: `sqlite:///./state.db`)
-- `NEXT_PUBLIC_API_URL=...` (for frontend -> backend URL)
-
-The backend now loads env vars from either:
-- `EasyApplyBot-master/.env` (recommended)
-- `EasyApplyBot-master/backend/.env` (optional alternate)
+Use `.env` only for infrastructure defaults (like `NEXT_PUBLIC_API_URL`/CORS/DB defaults), not for day-to-day credential input.
 
 ## Quick start
 

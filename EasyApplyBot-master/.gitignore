@@ -13,3 +13,4 @@ out/
 chrome_bot/
 *.log
 state.json
+runtime_settings.json

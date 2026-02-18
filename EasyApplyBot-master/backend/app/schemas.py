@@ -30,3 +30,18 @@ class DashboardStats(BaseModel):
     failed_today: int
     skipped_today: int
     date: date
+
+
+class RuntimeSettingsUpdate(BaseModel):
+    linkedin_email: str | None = None
+    linkedin_password: str | None = None
+    openai_api_key: str | None = None
+    openai_model: str | None = None
+
+
+class RuntimeSettingsResponse(BaseModel):
+    linkedin_email: str
+    linkedin_password: str
+    openai_api_key: str
+    openai_model: str
+    database_url: str

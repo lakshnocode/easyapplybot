@@ -1,10 +1,18 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { getDashboard, getJobs, startRun } from '../lib/api';
+import { getDashboard, getJobs, getSettings, saveSettings, startRun } from '../lib/api';
 
 type Dashboard = { total_applied: number; applied_today: number; failed_today: number; skipped_today: number; date: string };
 type Job = { id: number; title: string; company: string; location: string; status: string; notes: string; applied_at: string };
+
+type RuntimeSettings = {
+  linkedin_email: string;
+  linkedin_password: string;
+  openai_api_key: string;
+  openai_model: string;
+  database_url: string;
+};
 
 export default function HomePage() {
   const [dashboard, setDashboard] = useState<Dashboard | null>(null);
@@ -12,11 +20,19 @@ export default function HomePage() {
   const [positions, setPositions] = useState('Software Engineer,Backend Engineer');
   const [locations, setLocations] = useState('United States,Remote');
   const [remoteOnly, setRemoteOnly] = useState(true);
+  const [settingsStatus, setSettingsStatus] = useState('');
+
+  const [linkedinEmail, setLinkedinEmail] = useState('');
+  const [linkedinPassword, setLinkedinPassword] = useState('');
+  const [openaiApiKey, setOpenaiApiKey] = useState('');
+  const [openaiModel, setOpenaiModel] = useState('gpt-4o-mini');
 
   async function refresh() {
-    const [db, jobsData] = await Promise.all([getDashboard(), getJobs()]);
+    const [db, jobsData, runtime] = await Promise.all([getDashboard(), getJobs(), getSettings() as Promise<RuntimeSettings>]);
     setDashboard(db);
     setJobs(jobsData);
+    setLinkedinEmail(runtime.linkedin_email || '');
+    setOpenaiModel(runtime.openai_model || 'gpt-4o-mini');
   }
 
   useEffect(() => {
@@ -24,6 +40,19 @@ export default function HomePage() {
     const id = setInterval(refresh, 15000);
     return () => clearInterval(id);
   }, []);
+
+  async function persistSettings() {
+    await saveSettings({
+      linkedin_email: linkedinEmail,
+      linkedin_password: linkedinPassword,
+      openai_api_key: openaiApiKey,
+      openai_model: openaiModel,
+    });
+    setLinkedinPassword('');
+    setOpenaiApiKey('');
+    setSettingsStatus('Settings saved. Secrets are now stored server-side.');
+    await refresh();
+  }
 
   async function runBot() {
     await startRun({
@@ -46,6 +75,20 @@ export default function HomePage() {
         <article><h3>Applied Today</h3><p>{dashboard?.applied_today ?? 0}</p></article>
         <article><h3>Failed Today</h3><p>{dashboard?.failed_today ?? 0}</p></article>
         <article><h3>Skipped Today</h3><p>{dashboard?.skipped_today ?? 0}</p></article>
+      </section>
+
+      <section className="panel">
+        <h2>Account & AI Settings</h2>
+        <label>LinkedIn email</label>
+        <input value={linkedinEmail} onChange={(e) => setLinkedinEmail(e.target.value)} placeholder="you@example.com" />
+        <label>LinkedIn password</label>
+        <input type="password" value={linkedinPassword} onChange={(e) => setLinkedinPassword(e.target.value)} placeholder="Enter to update" />
+        <label>OpenAI API key</label>
+        <input type="password" value={openaiApiKey} onChange={(e) => setOpenaiApiKey(e.target.value)} placeholder="sk-... (optional)" />
+        <label>OpenAI model</label>
+        <input value={openaiModel} onChange={(e) => setOpenaiModel(e.target.value)} placeholder="gpt-4o-mini" />
+        <button onClick={persistSettings}>Save settings</button>
+        {settingsStatus ? <p className="ok">{settingsStatus}</p> : null}
       </section>
 
       <section className="panel">
